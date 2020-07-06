@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Unity.Entities;
 using UnityEngine;
 
 public class BeeManager : MonoBehaviour {
@@ -27,6 +28,9 @@ public class BeeManager : MonoBehaviour {
 	public float maxSpawnSpeed;
 	[Space(10)]
 	public int startBeeCount;
+
+	[Header("Hello ECS")]
+	[SerializeField] private Entity entityPrefab;
 
 	List<Bee> bees;
 	List<Bee>[] teamsOfBees;
