@@ -29,13 +29,9 @@ public class TargetAquisitionSystem : SystemBase
         {
             if (math.distance(targeter.Value.Value, float3.zero) < 0.1f)
             {
-                // targeter.Value = targetPositions[rand.NextInt(0, targetPositions.Length)];
                 float f = (noise.snoise(pos.Value) + 1.0f) * 0.5f;
                 int r = (int)math.round(f * targetPositions.Length);
                 targeter.Value = targetPositions[r];
-
-                float3 heading = targeter.Value.Value - pos.Value;
-                rotation.Value = quaternion.LookRotation(heading, math.up());
             }
         }
     }

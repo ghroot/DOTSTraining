@@ -10,7 +10,7 @@ public class MoveForwardSystem : SystemBase
         float deltaTime = Time.DeltaTime;
         var handle = Entities.WithAll<MoveForwardComponent>().ForEach((ref Translation t, in Rotation r) =>
         {
-            t.Value = t.Value + deltaTime * 10.0f * math.forward(r.Value);
+            t.Value = t.Value + deltaTime * 2.0f * math.forward(r.Value);
         }).ScheduleParallel(Dependency);
 
         Dependency = handle;
