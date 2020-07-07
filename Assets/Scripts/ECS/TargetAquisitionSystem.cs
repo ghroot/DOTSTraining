@@ -3,43 +3,40 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
-using UnityEngine;
-
-// using Random = UnityEngine.Random;
 
 public class TargetAquisitionSystem : SystemBase
 {
-    private EntityQuery targetableQuery;
     private EntityQuery targeterQuery;
+    private EntityQuery targetableQuery;
     
     protected override void OnCreate()
     {
-        targetableQuery = GetEntityQuery(typeof(TargetableComponent), ComponentType.ReadOnly<Translation>());
         targeterQuery = GetEntityQuery(typeof(TargeterComponent), ComponentType.ReadWrite<Translation>(), ComponentType.ReadWrite<Rotation>());
+        targetableQuery = GetEntityQuery(typeof(TargetableComponent), ComponentType.ReadOnly<Translation>());
     }
 
     [BurstCompile]
     struct TargetSetterJob : IJobForEach<TargeterComponent, Translation, Rotation>
     {
-        [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<Translation> targetPositions;
-        // [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<Entity> targets;
-        // [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<TeamComponent> teams;
+        [ReadOnly] public ComponentDataFromEntity<Translation> TranslationFromEntity;
+        [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<Entity> TargetableEntities;
 
         public void Execute(ref TargeterComponent targeter, [ReadOnly] ref Translation pos, ref Rotation rotation)
         {
-            if (math.distance(targeter.Value.Value, float3.zero) < 0.1f)
+            if (!TranslationFromEntity.HasComponent(targeter.Target))
             {
                 float f = (noise.snoise(pos.Value) + 1.0f) * 0.5f;
-                int r = (int)math.round(f * targetPositions.Length);
-                targeter.Value = targetPositions[r];
+                int randomIndex = (int) math.round(f * TargetableEntities.Length);
+                targeter.Target = TargetableEntities[randomIndex];
             }
         }
     }
 
     protected override void OnUpdate()
     {
-        TargetSetterJob job = new TargetSetterJob();
-        job.targetPositions = targetableQuery.ToComponentDataArray<Translation>(Allocator.TempJob);
+        var job = new TargetSetterJob();
+        job.TranslationFromEntity = GetComponentDataFromEntity<Translation>();
+        job.TargetableEntities = targetableQuery.ToEntityArray(Allocator.TempJob);
         Dependency = job.Schedule(targeterQuery, Dependency);
     }
 }

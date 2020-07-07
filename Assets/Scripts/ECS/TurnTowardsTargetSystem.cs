@@ -6,11 +6,17 @@ public class TurnTowardsTargetSystem : SystemBase
 {
 	protected override void OnUpdate()
 	{
+		var translationFromEntity = GetComponentDataFromEntity<Translation>();
+		
 		var handle = Entities.ForEach((ref Rotation rotation, in Translation translation, in TargeterComponent targeter) =>
 		{
-			float3 heading = targeter.Value.Value - translation.Value;
-			rotation.Value = quaternion.LookRotation(heading, math.up());
-		}).ScheduleParallel(Dependency);
+			if (translationFromEntity.HasComponent(targeter.Target))
+			{
+				var targetTranslation = translationFromEntity[targeter.Target];
+				float3 heading = targetTranslation.Value - translation.Value;
+				rotation.Value = quaternion.LookRotation(heading, math.up());
+			}
+		}).WithReadOnly(translationFromEntity).Schedule(Dependency);
 		Dependency = handle;
 	}
 }
