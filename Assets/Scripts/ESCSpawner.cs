@@ -1,6 +1,7 @@
 using System;
 using Unity.Entities;
 using Unity.Mathematics;
+using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -13,6 +14,7 @@ namespace DefaultNamespace
         [SerializeField] private int initialFoodCount = 10;
         [SerializeField] private int beeCount = 10;
         [SerializeField] private GameObject beePrefab;
+        [SerializeField] private Material[] beeMaterials;
         [SerializeField] private GameObject foodPrefab;
 
         private Entity beeEntityPrefab;
@@ -38,19 +40,19 @@ namespace DefaultNamespace
         {
             for (int i = 0; i < beeCount; i++)
             {
-                Entity prefabInstance = manager.Instantiate(beeEntityPrefab);
+                var entity = manager.Instantiate(beeEntityPrefab);
                 
-                Translation instancePosition = new Translation();
-                Vector3 beeStartPosition = Random.insideUnitSphere * 10.0f;
-                beeStartPosition.x += teamStartPosition.x;
-                beeStartPosition.y += teamStartPosition.y;
-                beeStartPosition.z += teamStartPosition.z;
-                instancePosition.Value = beeStartPosition;
-                manager.SetComponentData(prefabInstance, instancePosition);
+                var translation = new Translation();
+                translation.Value = teamStartPosition + (float3) Random.insideUnitSphere * 10.0f;
+                manager.SetComponentData(entity, translation);
                 
                 var team = new TeamComponent();
                 team.Value = teamId;
-                manager.SetComponentData(prefabInstance, team);
+                manager.SetComponentData(entity, team);
+
+                var renderMesh = manager.GetSharedComponentData<RenderMesh>(entity);
+                renderMesh.material = beeMaterials[teamId];
+                manager.SetSharedComponentData(entity, renderMesh);
             }
         }
 

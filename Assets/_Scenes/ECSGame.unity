@@ -553,6 +553,9 @@ MonoBehaviour:
   initialFoodCount: 1000
   beeCount: 10000
   beePrefab: {fileID: 83510564949952360, guid: e040c5500bbf04d0e9b3bdd3b7f77747, type: 3}
+  beeMaterials:
+  - {fileID: 2100000, guid: 27209684735d44a529407cb00b9a786b, type: 2}
+  - {fileID: 2100000, guid: f2a546b4878994a4bba87373cc37fbeb, type: 2}
   foodPrefab: {fileID: 3375349470734180421, guid: faa4b4e1055644c5fa6d72e59dded0ed,
     type: 3}
 --- !u!1 &1333962542
