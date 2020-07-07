@@ -39,6 +39,7 @@ namespace DefaultNamespace
             for (int i = 0; i < beeCount; i++)
             {
                 Entity prefabInstance = manager.Instantiate(beeEntityPrefab);
+                
                 Translation instancePosition = new Translation();
                 Vector3 beeStartPosition = Random.insideUnitSphere * 10.0f;
                 beeStartPosition.x += teamStartPosition.x;
@@ -46,6 +47,10 @@ namespace DefaultNamespace
                 beeStartPosition.z += teamStartPosition.z;
                 instancePosition.Value = beeStartPosition;
                 manager.SetComponentData(prefabInstance, instancePosition);
+                
+                var team = new TeamComponent();
+                team.Value = teamId;
+                manager.SetComponentData(prefabInstance, team);
             }
         }
 
