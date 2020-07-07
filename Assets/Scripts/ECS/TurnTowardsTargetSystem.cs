@@ -10,9 +10,9 @@ public class TurnTowardsTargetSystem : SystemBase
 		
 		var handle = Entities.ForEach((ref Rotation rotation, in Translation translation, in TargetComponent target) =>
 		{
-				var targetTranslation = translationFromEntity[target.Value];
-				var heading = targetTranslation.Value - translation.Value;
-				rotation.Value = quaternion.LookRotation(heading, math.up());
+			var targetTranslation = translationFromEntity[target.Value];
+			var heading = targetTranslation.Value - translation.Value;
+			rotation.Value = quaternion.LookRotation(heading, math.up());
 		}).WithReadOnly(translationFromEntity).Schedule(Dependency);
 		Dependency = handle;
 	}

@@ -550,8 +550,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 612d6cf2c5a543ed9b2f3378571459a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  initialFoodCount: 10
-  beeCount: 10
+  initialFoodCount: 1000
+  beeCount: 10000
   beePrefab: {fileID: 83510564949952360, guid: e040c5500bbf04d0e9b3bdd3b7f77747, type: 3}
   foodPrefab: {fileID: 3375349470734180421, guid: faa4b4e1055644c5fa6d72e59dded0ed,
     type: 3}
