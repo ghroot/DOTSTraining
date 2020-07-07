@@ -9,34 +9,40 @@ public class TargetAquisitionSystem : SystemBase
     private EntityQuery targeterQuery;
     private EntityQuery targetableQuery;
     
+    private EndSimulationEntityCommandBufferSystem bufferSystem;
+    
     protected override void OnCreate()
     {
-        targeterQuery = GetEntityQuery(typeof(TargeterComponent), ComponentType.ReadWrite<Translation>(), ComponentType.ReadWrite<Rotation>());
+        targeterQuery = GetEntityQuery(typeof(TargeterComponent), typeof(Translation), ComponentType.Exclude(typeof(TargetComponent)));
         targetableQuery = GetEntityQuery(typeof(TargetableComponent), ComponentType.ReadOnly<Translation>());
+
+        bufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
     }
 
     [BurstCompile]
-    struct TargetSetterJob : IJobForEach<TargeterComponent, Translation, Rotation>
+    struct TargetSetterJob : IJobForEachWithEntity<Translation>
     {
-        [ReadOnly] public ComponentDataFromEntity<Translation> TranslationFromEntity;
         [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<Entity> TargetableEntities;
+        public EntityCommandBuffer.Concurrent Buffer;
 
-        public void Execute(ref TargeterComponent targeter, [ReadOnly] ref Translation pos, ref Rotation rotation)
+        public void Execute(Entity entity, int index, ref Translation translation)
         {
-            if (!TranslationFromEntity.HasComponent(targeter.Target))
-            {
-                float f = (noise.snoise(pos.Value) + 1.0f) * 0.5f;
-                int randomIndex = (int) math.round(f * TargetableEntities.Length);
-                targeter.Target = TargetableEntities[randomIndex];
-            }
+            var f = (noise.snoise(translation.Value) + 1.0f) * 0.5f;
+            var randomIndex = (int) math.round(f * TargetableEntities.Length);
+            
+            Buffer.AddComponent<TargetComponent>(index, entity);
+            var target = new TargetComponent();
+            target.Value = TargetableEntities[randomIndex];
+            Buffer.SetComponent(index, entity, target);
         }
     }
 
     protected override void OnUpdate()
     {
         var job = new TargetSetterJob();
-        job.TranslationFromEntity = GetComponentDataFromEntity<Translation>();
         job.TargetableEntities = targetableQuery.ToEntityArray(Allocator.TempJob);
+        job.Buffer = bufferSystem.CreateCommandBuffer().ToConcurrent();
         Dependency = job.Schedule(targeterQuery, Dependency);
+        bufferSystem.AddJobHandleForProducer(Dependency);
     }
 }

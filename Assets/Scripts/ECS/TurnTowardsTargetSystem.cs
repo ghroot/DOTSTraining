@@ -8,14 +8,11 @@ public class TurnTowardsTargetSystem : SystemBase
 	{
 		var translationFromEntity = GetComponentDataFromEntity<Translation>();
 		
-		var handle = Entities.ForEach((ref Rotation rotation, in Translation translation, in TargeterComponent targeter) =>
+		var handle = Entities.ForEach((ref Rotation rotation, in Translation translation, in TargetComponent target) =>
 		{
-			if (translationFromEntity.HasComponent(targeter.Target))
-			{
-				var targetTranslation = translationFromEntity[targeter.Target];
-				float3 heading = targetTranslation.Value - translation.Value;
+				var targetTranslation = translationFromEntity[target.Value];
+				var heading = targetTranslation.Value - translation.Value;
 				rotation.Value = quaternion.LookRotation(heading, math.up());
-			}
 		}).WithReadOnly(translationFromEntity).Schedule(Dependency);
 		Dependency = handle;
 	}
